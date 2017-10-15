@@ -1,0 +1,48 @@
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Oct 12 16:02:22 2017
+
+@author: Gengar
+"""
+import numpy as np
+from scipy import ndimage
+import matplotlib.pyplot as plt
+from scipy import misc
+import cv2
+ 
+#Loading in the images 
+
+pice= ndimage.imread('bird.bmp',False,'L')
+picm = ndimage.imread('plane.bmp',False,'L')
+
+#blurring the images using gaussian filter 
+gpice = ndimage.gaussian_filter(pice, 3)
+gpicm = ndimage.gaussian_filter(picm, 3)
+plt.imshow(gpice,cmap='gray')
+plt.show()
+plt.imshow(gpicm,cmap='gray')
+plt.show()
+
+
+
+#removing low freq by subtracting gaussian blurred from original image array
+
+#first attempt to remove low frequcencys however it did not work 
+#kernel = np.array([[-1, -1, -1],[-1,  8, -1],[-1, -1, -1]])
+#highpass = ndimage.convolve(hp, kernel)
+
+highpass = gpice - pice
+
+hp = ndimage.gaussian_filter(highpass, 1)
+
+plt.imshow(highpass,cmap='gray')
+
+plt.show()
+
+#combining low pass and high pass images to create hybrid image 
+hp = hp + gpicm
+
+
+plt.imshow(hp,cmap='gray')
+
