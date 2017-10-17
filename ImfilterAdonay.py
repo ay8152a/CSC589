@@ -12,7 +12,7 @@ from scipy import misc
 import cv2
  
 
-
+#this file must be contained and ran from within data folder 
 #Loading in the images 
 #pice = cv2.imread('bird.bmp',1)
 pice= ndimage.imread('bird.bmp',False,'L')
