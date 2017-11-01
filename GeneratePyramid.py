@@ -1,15 +1,6 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Thu Feb 19 09:08:16 2015
-A Gaussian pyramid is basically a series of increasingly decimated images, 
-traditionally at downsampling rate r=2. At each level, the image is first blurred by convolving with a Gaussian-like filter to prevent aliasing
-in the downsampled image. We then move up a level in the Gaussian pyramid by downsampling the image (halving each dimension). 
-To build the Laplacian pyramid, we take each level of the Gaussian pyramid and 
-subtract from it the next level interpolated to the same size.
 
-@author: bxiao from http://pauljxtan.com/blog/011315/
 
-"""
 import numpy as np
 import scipy.signal as sig
 from scipy import misc
@@ -18,7 +9,7 @@ from scipy import ndimage
 
 img = misc.imread('apple.jpg',flatten=1)
 imgo= misc.imread('orange.jpg',flatten=1)
-mask= misc.imread('mask.jpg',flatten=1)
+
 # create a  Binomial (5-tap) filter
 kernel = (1.0/256)*np.array([[1, 4,  6,  4,  1],[4, 16, 24, 16, 4],[6, 24, 36, 24, 6],[4, 16, 24, 16, 4],[1, 4,  6,  4,  1]])
 
@@ -95,7 +86,7 @@ def reconstruct(L,G):
         img2 = np.zeros((2*img1.shape[0], 2*img1.shape[1]))
         img2 = img2[::1, ::1]
         g=b-i
-        img = G[g]+img2
+        img1 = G[g]+img2
         b-=1
     return img1
          #K = []
@@ -106,16 +97,21 @@ def reconstruct(L,G):
        # K.append(L[i]+img2)
         #g+=1
 def blender(image1,image2):
+    S=[]
+    mask= misc.imread('mask.jpg',flatten=1)
     [A,B] = pyramids(image1)
     [C,D] = pyramids(image2)
+    [E,F] = pyramids(mask)
+    j = len(E)
     mask = ndimage.filters.convolve(mask,4*kernel, mode='constant')
-    for i in range(0,k):
+    for i in range(0,j):
         b1= mask*B[i]
         b2= (1-mask)*D[i]
+        S.append(b1+b2)
     f=reconstruct(b1,b2) #if my reconstruct code worked i would utilize it for the blend code to collapse the pyramid to get the blended image 
     return(f)
 
-f = reconstruct(L,G)
+
 
 
 rows, cols = img.shape
@@ -152,7 +148,8 @@ fig, ax = plt.subplots()
 ax.imshow(composite_image,cmap='gray')
 plt.show()
 
-
+f = reconstruct(L,G)
+c= blender(img,imgo)
 ax.imshow(f,cmap='gray')
 plt.show()
                                    
