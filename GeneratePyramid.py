@@ -7,8 +7,8 @@ from scipy import misc
 import matplotlib.pyplot as plt
 from scipy import ndimage
 
-img = misc.imread('apple.jpg',flatten=1)
-imgo= misc.imread('orange.jpg',flatten=1)
+img = misc.imread('obama.jpg',flatten=1)
+imgo= misc.imread('trump.jpg',flatten=1)
 
 # create a  Binomial (5-tap) filter
 kernel = (1.0/256)*np.array([[1, 4,  6,  4,  1],[4, 16, 24, 16, 4],[6, 24, 36, 24, 6],[4, 16, 24, 16, 4],[1, 4,  6,  4,  1]])
@@ -78,78 +78,102 @@ def pyramids(image):
 
 # reconstruct the pyramids, here you write a reconstrut function that takes the 
 # pyramid and upsampling the each level and add them up.    
-def reconstruct(L,G):
+def reconstruct(L):
    
-    img1=L[-1]
-    b=len(G)-1
-    for i in range(len(G) - 1):
-        img2 = np.zeros((2*img1.shape[0], 2*img1.shape[1]))
-        img2 = img2[::1, ::1]
-        g=b-i
-        img1 = G[g]+img2
-        b-=1
-    return img1
-         #K = []
-        #g=0
-    #for i in L[::-1]:
-       # img2 = np.zeros((2*L[i].shape[0], 2*L[i].shape[1]))
-       # img2 = img2[::2, ::2] 
-       # K.append(L[i]+img2)
-        #g+=1
+    #rows,cols = L[0].shape[0],L[0].shape[0]
+    J=[L[0]]
+    
+    for i in range(len(L)-1, 0, -1):
+        img2 = L[i]
+      #  img1 = L[i+1]
+        for j in range(i):
+            img2 = interpolate(img2)
+        J.append(img2)
+    
+    return(sum(J))
+
+
+       
+
+ 
 def blender(image1,image2):
     S=[]
-    mask= misc.imread('mask.jpg',flatten=1)
+    
+    mask = misc.imread('mask.jpg',flatten=1)
     [A,B] = pyramids(image1)
     [C,D] = pyramids(image2)
-    [E,F] = pyramids(mask)
-    j = len(E)
-    mask = ndimage.filters.convolve(mask,4*kernel, mode='constant')
+    #[E,F] = pyramids(mask)
+    j = len(A)
+   # mask = ndimage.filters.convolve(mask,4*kernel, mode='constant')
     for i in range(0,j):
         b1= mask*B[i]
-        b2= (1-mask)*D[i]
+        b2= (255-mask)*D[i]
+        mask = mask[::2,::2]
+
         S.append(b1+b2)
-    f=reconstruct(b1,b2) #if my reconstruct code worked i would utilize it for the blend code to collapse the pyramid to get the blended image 
-    return(f)
+        
+        
+        
+    #call this outside f=reconstruct(b1,b2) #if my reconstruct code worked i would utilize it for the blend code to collapse the pyramid to get the blended image 
+    return(S)
 
 
 
 
-rows, cols = img.shape
-composite_image = np.zeros((rows, cols + cols / 2), dtype=np.double)
-composite_image[:rows, :cols] = G[0]
-
-i_row = 0
-for p in G[1:]:
-    n_rows, n_cols = p.shape[:2]
-    composite_image[i_row:i_row + n_rows, cols:cols + n_cols] = p
-    i_row += n_rows
+K= blender(img,imgo)
+blended = reconstruct(K)
+plt.imshow(blended)
 
 
-fig, ax = plt.subplots()
-    
-ax.imshow(composite_image,cmap='gray')
-plt.show()
+#rows, cols = img.shape
+#composite_image = np.zeros((rows, cols + cols / 2), dtype=np.double)
+#composite_image[:rows, :cols] = G[0]
+#
+#i_row = 0
+#for p in G[1:]:
+#    n_rows, n_cols = p.shape[:2]
+#    composite_image[i_row:i_row + n_rows, cols:cols + n_cols] = p
+#    i_row += n_rows
+#
+#
+#fig, ax = plt.subplots()
+#    
+#ax.imshow(composite_image,cmap='gray')
+#plt.show()
+#
+#
+#rows, cols = img.shape
+#composite_image = np.zeros((rows, cols + cols / 2), dtype=np.double)
+#
+#composite_image[:rows, :cols] = L[0]
+#
+#i_row = 0
+#for p in L[1:]:
+#    n_rows, n_cols = p.shape[:2]
+#    composite_image[i_row:i_row + n_rows, cols:cols + n_cols] = p
+#    i_row += n_rows
+#
+#
+#fig, ax = plt.subplots()
+#    
+#ax.imshow(composite_image,cmap='gray')
+#plt.show()
+#
+#rows, cols = img.shape
+#composite_image = np.zeros((rows, cols + cols / 2), dtype=np.double)
+#
+#composite_image[:rows, :cols] = L[0]
+#
+#i_row = 0
+##for p in blended[1:]:
+##    n_rows, n_cols = p.shape[:2]
+#composite_image[i_row:i_row + n_rows, cols:cols + n_cols] = p
+##    i_row += n_rows
+#
+#
+#fig, ax = plt.subplots()
+#    
+#ax.imshow(composite_image,cmap='gray')
+#plt.show()
 
 
-rows, cols = img.shape
-composite_image = np.zeros((rows, cols + cols / 2), dtype=np.double)
-
-composite_image[:rows, :cols] = L[0]
-
-i_row = 0
-for p in L[1:]:
-    n_rows, n_cols = p.shape[:2]
-    composite_image[i_row:i_row + n_rows, cols:cols + n_cols] = p
-    i_row += n_rows
-
-
-fig, ax = plt.subplots()
-    
-ax.imshow(composite_image,cmap='gray')
-plt.show()
-
-f = reconstruct(L,G)
-c= blender(img,imgo)
-ax.imshow(f,cmap='gray')
-plt.show()
-                                   
