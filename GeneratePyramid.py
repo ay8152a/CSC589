@@ -7,8 +7,8 @@ from scipy import misc
 import matplotlib.pyplot as plt
 from scipy import ndimage
 
-img = misc.imread('obama.jpg',flatten=1)
-imgo= misc.imread('trump.jpg',flatten=1)
+img = misc.imread('orange.jpg',flatten=1)
+imgo= misc.imread('apple.jpg',flatten=1)
 
 # create a  Binomial (5-tap) filter
 kernel = (1.0/256)*np.array([[1, 4,  6,  4,  1],[4, 16, 24, 16, 4],[6, 24, 36, 24, 6],[4, 16, 24, 16, 4],[1, 4,  6,  4,  1]])
